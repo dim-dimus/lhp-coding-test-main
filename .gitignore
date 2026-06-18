@@ -1,0 +1,58 @@
+# Dependencies
+/node_modules
+/vendor
+.pnpm-store/
+
+# Build output / compiled assets
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+
+# Bootstrap cache (Laravel keeps a .gitignore inside, this is a safety net)
+/bootstrap/ssr
+
+# Environment & secrets
+.env
+.env.backup
+.env.production
+.env.*.local
+auth.json
+
+# SSR / server bundle
+/.vite-ssr
+
+# Laravel / framework
+Homestead.json
+Homestead.yaml
+/.phpunit.cache
+.phpunit.result.cache
+.phpstan.cache
+
+# Logs
+/storage/logs/*.log
+npm-debug.log
+yarn-error.log
+
+# Editors & IDEs
+/.idea
+/.fleet
+/.vscode
+/.zed
+/.nova
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Misc
+.phpactor.json
