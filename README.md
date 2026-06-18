@@ -2,8 +2,8 @@
 
 Laravel 13 + Inertia + Vue 3 + Tailwind v4 coding test. See
 [CODING_TEST.md](CODING_TEST.md) for the brief,
-[INVESTIGATION.md](INVESTIGATION.md) for the code review and approach analysis,
-and [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the build plan.
+[INVESTIGATION.md](INVESTIGATION.md) for the original code review and bug list,
+and [CLAUDE.md](CLAUDE.md) for the chosen solution (**Approach A**) and its plan.
 
 Development on this project follows [SKILL.md](SKILL.md).
 
@@ -35,9 +35,12 @@ docker run --name lhp-mysql \
 cp .env.example .env
 php artisan key:generate
 
-# 4. Database — migrate, then seed events (count = SEED_ROWS in .env, default 500)
+# 4. Database — migrate, then seed events (count = SEED_ROWS in .env, default 500).
+#    `db:seed` also backfills events.city/country for the location filter.
 php artisan migrate
-php artisan db:seed --class=EventSeeder
+php artisan db:seed
+# (if you seed only EventSeeder, run the backfill yourself:)
+# php artisan events:backfill-locations
 
 # 5. Run everything (server + queue worker + Vite + log tail)
 composer dev
@@ -71,8 +74,8 @@ composer lint         # Pint (PHP) formatting
 - **Queue:** `QUEUE_CONNECTION=database` — `composer dev` runs a `queue:listen`
   worker so queued mail is processed.
 - **Dataset size:** `SEED_ROWS` in `.env` controls how many events are seeded
-  (default 500 for a fast local start). The planted full dataset is 1,250,000,
-  used in the benchmark phase — see [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
+  (default 500 for a fast local start). The planted full dataset is 1,250,000 —
+  Approach A is built to handle it (see [CLAUDE.md](CLAUDE.md)).
 
 ## Bug fixes applied
 
@@ -82,13 +85,10 @@ Fixed as part of getting the project running (details in
 - **Dead filter button** — `Events/Index.vue` bound a misspelled handler
   (`aplyFilters`), so the Filter button did nothing. Now wired to `applyFilters`.
 - **`from` date filter ignored** — the frontend sent a `from` param but
-  `EventController::loadListing()` only filtered by status. The date filter is
-  now applied (`created_time >= from`), verified end to end.
+  `EventController::loadListing()` only filtered by status. Now applied.
 
-The performance-related findings (unindexed sort, `COUNT(*)` on the full table,
-payload over-fetch) are intentionally **not** changed here — they are the
-differentiators evaluated across the four approach branches described in
-[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
+The performance findings (unindexed sort, `COUNT(*)`, payload over-fetch,
+unindexed location data) are addressed by **Approach A** — see [CLAUDE.md](CLAUDE.md).
 
 ## Stopping / resetting
 

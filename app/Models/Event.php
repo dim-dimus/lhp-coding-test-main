@@ -2,13 +2,30 @@
 
 namespace App\Models;
 
-use App\Support\Geocoder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
+/**
+ * @property string $id
+ * @property int $user_id
+ * @property string $type
+ * @property string $status
+ * @property int|null $created_time
+ * @property float|null $latitude
+ * @property float|null $longitude
+ * @property string|null $city
+ * @property string|null $country
+ * @property array<string, mixed> $payload
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read list<string> $images
+ * @property-read string|null $address
+ */
 class Event extends Model
 {
     use HasFactory, HasUuids;
@@ -18,18 +35,13 @@ class Event extends Model
 
     protected $guarded = [];
 
-    protected $appends = ['images', 'address', 'city'];
+    protected $appends = ['images', 'address'];
 
     protected $casts = [
         'payload' => 'array',
         'latitude' => 'float',
         'longitude' => 'float',
     ];
-
-    /** @var array{city: string, region: ?string, country: string}|null */
-    private ?array $resolvedGeo = null;
-
-    private bool $geoResolved = false;
 
     public function newUniqueId(): string
     {
@@ -39,6 +51,14 @@ class Event extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return HasMany<Attendee, $this>
+     */
+    public function attendees(): HasMany
+    {
+        return $this->hasMany(Attendee::class);
     }
 
     /**
@@ -65,32 +85,11 @@ class Event extends Model
         );
     }
 
-    /** Human-readable address derived from the coordinates (offline). */
+    /** Human-readable address built from the denormalized location columns. */
     public function getAddressAttribute(): ?string
     {
-        $geo = $this->geo();
+        $parts = array_filter([$this->city, $this->country]);
 
-        if ($geo === null) {
-            return null;
-        }
-
-        return implode(', ', array_filter([$geo['city'], $geo['region'], $geo['country']]));
-    }
-
-    /** City name only, handy for location filtering. */
-    public function getCityAttribute(): ?string
-    {
-        return $this->geo()['city'] ?? null;
-    }
-
-    /** @return array{city: string, region: ?string, country: string}|null */
-    private function geo(): ?array
-    {
-        if (! $this->geoResolved) {
-            $this->resolvedGeo = Geocoder::nearest($this->latitude, $this->longitude);
-            $this->geoResolved = true;
-        }
-
-        return $this->resolvedGeo;
+        return $parts === [] ? null : implode(', ', $parts);
     }
 }

@@ -22,7 +22,7 @@ class Geocoder
             return null;
         }
 
-        $anchors = self::$anchors ??= config('geo.anchors', []);
+        $anchors = self::anchors();
 
         $best = null;
         $bestDistance = INF;
@@ -55,5 +55,27 @@ class Geocoder
         }
 
         return implode(', ', array_filter([$place['city'], $place['region'], $place['country']]));
+    }
+
+    /**
+     * Sorted, unique list of city names — used to populate location filters.
+     *
+     * @return list<string>
+     */
+    public static function cities(): array
+    {
+        $names = array_map(fn (array $anchor): string => $anchor[2], self::anchors());
+        $names = array_values(array_unique($names));
+        sort($names);
+
+        return $names;
+    }
+
+    /**
+     * @return array<int, array{0: float, 1: float, 2: string, 3: ?string, 4: string}>
+     */
+    private static function anchors(): array
+    {
+        return self::$anchors ??= config('geo.anchors', []);
     }
 }
