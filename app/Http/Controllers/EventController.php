@@ -53,6 +53,12 @@ class EventController extends Controller
 
         $events = Event::with('user')
             ->when($request->status, fn ($q, $s) => $q->where('status', $s))
+            ->when($request->filled('from'), function ($q) use ($request) {
+                $ts = strtotime((string) $request->input('from'));
+                if ($ts !== false) {
+                    $q->where('created_time', '>=', $ts);
+                }
+            })
             ->orderByDesc('created_time')
             ->paginate(50)
             ->withQueryString();

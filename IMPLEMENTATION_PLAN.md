@@ -23,11 +23,14 @@ Stated explicitly (SKILL.md §1). Adjust before starting if any are wrong.
    **Visual 2 = interactive map**. Holding the UI constant isolates the data
    layer as the only benchmarked variable. (Approach C's map additionally shows
    aggregate clusters; noted in its section.)
-3. **One engine (SQLite)** for all four, so the DB engine isn't a confounding
-   variable. Approach C's "search index" is SQLite FTS5 / a denormalized table,
-   not an external service.
-4. **Fair data:** seed the base dataset once, then **copy the `.sqlite` file**
-   per branch and run only that approach's migrations/backfills on the copy.
+3. **One engine (MySQL 8, InnoDB)** for all four, so the DB engine isn't a
+   confounding variable. Each approach gets its own MySQL **database/schema**
+   (`bench_a` … `bench_d`). Approach C's "search index" is a MySQL **FULLTEXT**
+   index / a denormalized table (not SQLite FTS5, not an external service).
+4. **Fair data:** seed one base database (`bench_base`) once, then **`mysqldump`
+   it and import into each per-approach database**, and run only that approach's
+   migrations/backfills on the copy. (MySQL has no single-file copy like SQLite,
+   so dump-and-import is the equivalent that guarantees identical base rows.)
 5. **Timezone:** `created_time` is treated as a UTC instant (it is the event
    start time). Times are formatted for display in the viewer's local timezone
    on the frontend; UTC is the storage/comparison basis on the backend.
@@ -39,7 +42,7 @@ Stated explicitly (SKILL.md §1). Adjust before starting if any are wrong.
 ## Conventions
 
 - Branch from `main` → `bench/base` → one branch per approach.
-- Each branch points at its own DB via `.env` (`DB_DATABASE=.../bench_x.sqlite`).
+- Each branch points at its own MySQL schema via `.env` (`DB_DATABASE=bench_x`).
 - Keep diffs surgical (SKILL.md §3): touch only the listing path + visuals per
   approach; shared code stays on `bench/base` and is merged forward.
 - Update [tests/Feature/EventListingTest.php](tests/Feature/EventListingTest.php)
@@ -49,18 +52,26 @@ Stated explicitly (SKILL.md §1). Adjust before starting if any are wrong.
 
 ## Phase 0 — Prerequisites (on `main`)
 
-1. **Create `.env`** from framework defaults: `DB_CONNECTION=sqlite`,
+1. **Provision MySQL 8** and create the base schema `bench_base` (utf8mb4).
+   **Create `.env`**: `DB_CONNECTION=mysql`, `DB_HOST`, `DB_PORT=3306`,
+   `DB_DATABASE=bench_base`, `DB_USERNAME`/`DB_PASSWORD`,
    `QUEUE_CONNECTION=database`, `MAIL_MAILER=log`, `APP_TIMEZONE=UTC`,
    `php artisan key:generate`.
-   **Verify:** `php artisan about` runs; `php artisan migrate` succeeds.
-2. **Seed the base dataset once** at the chosen size (`SEED_ROWS`), into
-   `database/base.sqlite`.
-   **Verify:** row count matches `SEED_ROWS`; file size is sane.
+   **Verify:** `php artisan about` shows the mysql connection; `php artisan
+   migrate` succeeds against `bench_base`.
+2. **Seed the base dataset once** at the chosen size (`SEED_ROWS`) into
+   `bench_base`. For bulk-insert throughput on InnoDB, wrap the seed run in a
+   single transaction per chunk (already done) and consider
+   `SET unique_checks=0; SET foreign_key_checks=0;` for the load.
+   **Verify:** `SELECT COUNT(*)` matches `SEED_ROWS`; data + index size is sane
+   (`information_schema.TABLES`).
 3. **Pin the seed RNG** (add `mt_srand(<fixed>)` at the top of
-   `EventSeeder::run()`) so re-seeds are reproducible. *(Only change if a re-seed
-   rather than file-copy is ever needed; file-copy is the primary path.)*
+   `EventSeeder::run()`) so the base seed is reproducible.
    **Verify:** two seeds of N rows produce identical first/last row ids.
-4. **Commit** Phase 0, branch `bench/base`.
+4. **Snapshot the base data:** `mysqldump bench_base > database/dumps/base.sql`
+   — this is the artifact imported into each per-approach schema later.
+   **Verify:** the dump restores into a scratch schema with the same row count.
+5. **Commit** Phase 0, branch `bench/base`.
    **Verify:** `git branch` shows `bench/base`; tests still green.
 
 ---
@@ -113,9 +124,12 @@ Stated explicitly (SKILL.md §1). Adjust before starting if any are wrong.
 - `events:benchmark {approach}` artisan command that, against the current DB,
   measures over N runs and records:
   - p50 / p95 latency: first page, deep page (offset ~10k), date-filtered,
-    location-filtered.
+    location-filtered. Capture both **cold** (after `FLUSH TABLES` / restart) and
+    **warm** (buffer pool primed) runs, since MySQL's InnoDB buffer pool heavily
+    affects repeat reads.
   - bytes per page (reuse existing `stats.bytes` shape).
-  - DB size on disk, migration/index build time, peak memory.
+  - data + index size (`information_schema.TABLES`), migration/index build time,
+    peak memory.
 - Writes/appends a row to `BENCHMARK.md` (and a machine-readable
   `storage/benchmark/<approach>.json`).
   **Verify:** running it on `bench/base` produces a complete metrics row.
@@ -133,12 +147,13 @@ Stated explicitly (SKILL.md §1). Adjust before starting if any are wrong.
 
 ## Phase 2 — Approach A: Pragmatic server-driven
 
-Branch `approach/a-server-driven` from `bench/base`; DB `bench_a.sqlite`.
+Branch `approach/a-server-driven` from `bench/base`. Create schema `bench_a`,
+import `database/dumps/base.sql` into it, point `.env` `DB_DATABASE=bench_a`.
 
 1. Migration: composite index `(created_time, id)`; backfill denormalized
    `city` + `country` columns (from the geocoder) with an index on `city`.
-   **Verify:** `EXPLAIN QUERY PLAN` uses the index for ordered + city-filtered
-   reads.
+   **Verify:** `EXPLAIN` / `EXPLAIN ANALYZE` shows the index used for ordered +
+   city-filtered reads.
 2. Listing query: **keyset/cursor pagination** on `(created_time, id)`; filter by
    date range (`created_time BETWEEN`) and by `city`. No `COUNT(*)` on the hot
    path (approximate or omit exact total).
@@ -156,7 +171,8 @@ Branch `approach/a-server-driven` from `bench/base`; DB `bench_a.sqlite`.
 
 ## Phase 3 — Approach B: Inertia-native, minimal JS
 
-Branch `approach/b-inertia-native` from `bench/base`; DB `bench_b.sqlite`.
+Branch `approach/b-inertia-native` from `bench/base`. Create schema `bench_b`,
+import `database/dumps/base.sql` into it, point `.env` `DB_DATABASE=bench_b`.
 
 1. Same `(created_time, id)` index as A (no denormalized columns).
    **Verify:** index used for ordered reads.
@@ -180,11 +196,13 @@ Branch `approach/b-inertia-native` from `bench/base`; DB `bench_b.sqlite`.
 
 ## Phase 4 — Approach C: Read-model / search-first
 
-Branch `approach/c-read-model` from `bench/base`; DB `bench_c.sqlite`.
+Branch `approach/c-read-model` from `bench/base`. Create schema `bench_c`,
+import `database/dumps/base.sql` into it, point `.env` `DB_DATABASE=bench_c`.
 
-1. Build a denormalized read model: either a `event_search` table (slim columns +
-   `city`, `month` buckets, composite indexes) or SQLite **FTS5**, populated from
-   `events`/`payload` via a backfill command.
+1. Build a denormalized read model: an `event_search` table (slim columns +
+   `city`, `month` buckets, composite B-tree indexes, plus a MySQL **FULLTEXT**
+   index on name/description for text search), populated from `events`/`payload`
+   via a backfill command.
    **Verify:** read-model row count matches base; build time recorded.
 2. Pre-aggregate facet counts (events per city, per month) into a small
    `event_facets` table so the UI shows filter tallies without `COUNT(*)` on the
@@ -203,7 +221,8 @@ Branch `approach/c-read-model` from `bench/base`; DB `bench_c.sqlite`.
 
 ## Phase 5 — Approach D: Thin vertical slice (MVP)
 
-Branch `approach/d-thin-slice` from `bench/base`; DB `bench_d.sqlite`.
+Branch `approach/d-thin-slice` from `bench/base`. Create schema `bench_d`,
+import `database/dumps/base.sql` into it, point `.env` `DB_DATABASE=bench_d`.
 
 1. Migration: **only** the `created_time` index. No new columns, no read model.
    **Verify:** index used for ordered reads.
@@ -223,12 +242,14 @@ Branch `approach/d-thin-slice` from `bench/base`; DB `bench_d.sqlite`.
 
 ## Phase 6 — Benchmark & decision
 
-1. With each branch checked out against its own DB copy, run
-   `events:benchmark <x>` for a, b, c, d (same N runs, same machine, same
-   dataset size for the published run).
+1. With each branch checked out against its own MySQL schema (`bench_a`…`bench_d`,
+   all imported from the same `base.sql`), run `events:benchmark <x>` for
+   a, b, c, d (same N runs, same MySQL instance/config, same dataset size for the
+   published run; report cold and warm).
    **Verify:** four metrics rows + four JSON files exist.
 2. Compile `BENCHMARK.md`: a comparison table (latency p50/p95 per query type,
-   bytes/page, DB size, build time, memory) + notes on correctness/complexity.
+   bytes/page, data+index size, build time, memory) + notes on
+   correctness/complexity.
    **Verify:** table is complete; numbers reproducible on a second run.
 3. **Recommendation** section: pick the best approach against the test's
    "quality over quantity / focused" brief, weighing performance vs. complexity
@@ -241,10 +262,10 @@ Branch `approach/d-thin-slice` from `bench/base`; DB `bench_d.sqlite`.
 
 - [ ] `bench/base` with shared images, addresses, attendees, emails, reminders,
       benchmark harness, visual shells.
-- [ ] `approach/a-server-driven` + `bench_a.sqlite` + benchmark row.
-- [ ] `approach/b-inertia-native` + `bench_b.sqlite` + benchmark row.
-- [ ] `approach/c-read-model` + `bench_c.sqlite` + benchmark row.
-- [ ] `approach/d-thin-slice` + `bench_d.sqlite` + benchmark row.
+- [ ] `approach/a-server-driven` + schema `bench_a` + benchmark row.
+- [ ] `approach/b-inertia-native` + schema `bench_b` + benchmark row.
+- [ ] `approach/c-read-model` + schema `bench_c` + benchmark row.
+- [ ] `approach/d-thin-slice` + schema `bench_d` + benchmark row.
 - [ ] `BENCHMARK.md` comparison + recommendation.
 - [ ] All bugs from [INVESTIGATION.md §2](INVESTIGATION.md) fixed on every branch.
 - [ ] Tests green on every branch.

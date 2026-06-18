@@ -39,7 +39,7 @@ empty `<h1>` placeholders — they are the actual deliverable. A separate
 
 **Runtime defaults** (no `.env` committed yet):
 
-- DB: `sqlite`
+- DB: `sqlite` *(shipped default; this build targets **MySQL 8 / InnoDB** — see §4)*
 - Queue: `database` (jobs table migration already present)
 - Mail: `log`
 - App timezone: `UTC`
@@ -155,13 +155,19 @@ within the "quality over quantity" brief.
 ## 4. Decision
 
 Rather than pick one approach on reasoning alone, the agreed direction is to
-**implement all four approaches and decide empirically**:
+**implement all four approaches and decide empirically**, on **MySQL 8 (InnoDB)**:
 
-- Each approach lives on its own branch against its own SQLite database copy.
+- Each approach lives on its own branch against its own MySQL **schema**
+  (`bench_a` … `bench_d`).
+- Fair data: seed one base schema once, `mysqldump` it, and import that dump into
+  each per-approach schema (MySQL has no single-file copy like SQLite).
 - A shared `bench/base` branch holds the layer common to all four (images,
   addresses, attendees, email/reminders, the benchmark harness, visual shells).
-- A repeatable benchmark harness records latency (p50/p95), bytes per page, DB
-  size, build time, and memory per approach.
+- A repeatable benchmark harness records latency (p50/p95, **cold and warm** —
+  InnoDB buffer-pool sensitive), bytes per page, data+index size, build time, and
+  memory per approach.
+- Approach C's "search index" uses a MySQL **FULLTEXT** index / denormalized
+  table (not SQLite FTS5, not an external service).
 - Results are compiled into `BENCHMARK.md` with a justified, metrics-backed
   recommendation.
 
