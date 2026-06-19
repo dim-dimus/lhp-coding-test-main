@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import EventRegisterDialog from '@/components/EventRegisterDialog.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -35,17 +35,34 @@ const form = reactive({
     city: props.filters.city ?? '',
 });
 
-const cursor = ref(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+// Prefetch the next page once the user reaches the middle of the last loaded
+// page (half of the 24-row page = 12 rows from the end).
+const TRIGGER_FROM_END = 12;
+
+const month = ref(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
 const events = ref<EventRow[]>([]);
+const pageCursor = ref<string | null>(null);
+const hasMore = ref(true);
 const loading = ref(false);
 const registerDialog = ref<InstanceType<typeof EventRegisterDialog> | null>(null);
+
+let observer: IntersectionObserver | null = null;
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const isoDay = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
 const monthLabel = computed(() =>
-    new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' }).format(cursor.value),
+    new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' }).format(month.value),
 );
+
+// Event that sits half a page from the end; its sentinel triggers the next load.
+const triggerId = computed(() => {
+    if (events.value.length === 0) {
+        return null;
+    }
+
+    return events.value[Math.max(0, events.value.length - TRIGGER_FROM_END)].id;
+});
 
 const groups = computed<DayGroup[]>(() => {
     const map = new Map<string, EventRow[]>();
@@ -79,57 +96,67 @@ const groups = computed<DayGroup[]>(() => {
         });
 });
 
-async function loadMonth() {
+async function loadPage() {
+    if (loading.value || !hasMore.value) {
+        return;
+    }
+
     loading.value = true;
-    events.value = [];
 
-    const first = new Date(cursor.value.getFullYear(), cursor.value.getMonth(), 1);
-    const last = new Date(cursor.value.getFullYear(), cursor.value.getMonth() + 1, 0);
-    const from = isoDay(first);
-    const to = isoDay(last);
+    const first = new Date(month.value.getFullYear(), month.value.getMonth(), 1);
+    const last = new Date(month.value.getFullYear(), month.value.getMonth() + 1, 0);
+    const params = new URLSearchParams({ sort: 'asc', from: isoDay(first), to: isoDay(last) });
 
-    let pageCursor: string | null = null;
-    let more = true;
-    let guard = 0;
+    if (pageCursor.value) {
+        params.set('cursor', pageCursor.value);
+    }
+
+    if (form.status) {
+        params.set('status', form.status);
+    }
+
+    if (form.city) {
+        params.set('city', form.city);
+    }
 
     try {
-        while (more && guard < 50) {
-            const params = new URLSearchParams({ sort: 'asc', from, to });
-
-            if (pageCursor) {
-                params.set('cursor', pageCursor);
-            }
-
-            if (form.status) {
-                params.set('status', form.status);
-            }
-
-            if (form.city) {
-                params.set('city', form.city);
-            }
-
-            const response = await fetch(`/events/data?${params.toString()}`, {
-                headers: { Accept: 'application/json' },
-            });
-            const payload = await response.json();
-            events.value.push(...payload.data);
-            pageCursor = payload.next_cursor;
-            more = payload.has_more;
-            guard++;
-        }
+        const response = await fetch(`/events/data?${params.toString()}`, {
+            headers: { Accept: 'application/json' },
+        });
+        const payload = await response.json();
+        events.value.push(...payload.data);
+        pageCursor.value = payload.next_cursor;
+        hasMore.value = payload.has_more;
     } finally {
         loading.value = false;
     }
 }
 
+function reload() {
+    events.value = [];
+    pageCursor.value = null;
+    hasMore.value = true;
+    loadPage();
+}
+
+// Re-point the IntersectionObserver at the current midpoint card as it moves.
+function onTriggerRef(el: unknown) {
+    if (!observer || !(el instanceof Element)) {
+        return;
+    }
+
+    observer.disconnect();
+    observer.observe(el);
+}
+
 function shiftMonth(delta: number) {
-    cursor.value = new Date(cursor.value.getFullYear(), cursor.value.getMonth() + delta, 1);
-    loadMonth();
+    month.value = new Date(month.value.getFullYear(), month.value.getMonth() + delta, 1);
+    reload();
 }
 
 function goToday() {
-    cursor.value = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    loadMonth();
+    month.value = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    reload();
 }
 
 const statusVariant = (status: string) => {
@@ -149,7 +176,19 @@ function openRegister(event: EventRow) {
     registerDialog.value?.show(event.id, event.name ?? 'this event');
 }
 
-onMounted(loadMonth);
+onMounted(() => {
+    observer = new IntersectionObserver(
+        (entries) => {
+            if (entries[0]?.isIntersecting) {
+                loadPage();
+            }
+        },
+        { rootMargin: '200px' },
+    );
+    reload();
+});
+
+onBeforeUnmount(() => observer?.disconnect());
 </script>
 
 <template>
@@ -177,7 +216,7 @@ onMounted(loadMonth);
                             id="city"
                             v-model="form.city"
                             class="h-9 rounded-md border border-input bg-background px-3 text-sm"
-                            @change="loadMonth"
+                            @change="reload"
                         >
                             <option value="">Anywhere</option>
                             <option v-for="c in cities" :key="c" :value="c">{{ c }}</option>
@@ -189,7 +228,7 @@ onMounted(loadMonth);
                             id="status"
                             v-model="form.status"
                             class="h-9 rounded-md border border-input bg-background px-3 text-sm"
-                            @change="loadMonth"
+                            @change="reload"
                         >
                             <option value="">All</option>
                             <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
@@ -199,12 +238,26 @@ onMounted(loadMonth);
             </div>
         </header>
 
-        <p v-if="loading" class="py-10 text-center text-sm text-muted-foreground">Loading {{ monthLabel }}…</p>
-        <p v-else-if="groups.length === 0" class="py-10 text-center text-sm text-muted-foreground">
+        <p
+            v-if="loading && groups.length === 0"
+            class="py-10 text-center text-sm text-muted-foreground"
+        >
+            Loading {{ monthLabel }}…
+        </p>
+        <p
+            v-else-if="!loading && groups.length === 0"
+            class="py-10 text-center text-sm text-muted-foreground"
+        >
             No events in {{ monthLabel }}.
         </p>
 
-        <TransitionGroup v-else name="day" tag="div" class="flex flex-col gap-6">
+        <TransitionGroup
+            v-if="groups.length > 0"
+            tag="div"
+            class="flex flex-col gap-6"
+            enter-active-class="transition-all duration-300 ease-out"
+            enter-from-class="translate-y-2 opacity-0"
+        >
             <section v-for="group in groups" :key="group.key" class="flex gap-4">
                 <div class="flex w-14 flex-col items-center pt-1">
                     <span class="text-xs uppercase text-muted-foreground">{{ group.weekday }}</span>
@@ -215,6 +268,7 @@ onMounted(loadMonth);
                     <article
                         v-for="event in group.events"
                         :key="event.id"
+                        :ref="event.id === triggerId ? onTriggerRef : undefined"
                         class="flex gap-4 rounded-lg border bg-card p-3 transition hover:shadow-md"
                     >
                         <img
@@ -245,17 +299,14 @@ onMounted(loadMonth);
                 </div>
             </section>
         </TransitionGroup>
+
+        <p
+            v-if="loading && groups.length > 0"
+            class="py-4 text-center text-xs text-muted-foreground"
+        >
+            Loading more…
+        </p>
     </div>
 
     <EventRegisterDialog ref="registerDialog" />
 </template>
-
-<style scoped>
-.day-enter-active {
-    transition: all 0.35s ease;
-}
-.day-enter-from {
-    opacity: 0;
-    transform: translateY(10px);
-}
-</style>

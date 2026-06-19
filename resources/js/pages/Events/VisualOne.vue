@@ -226,9 +226,10 @@ onBeforeUnmount(() => observer?.disconnect());
 
         <!-- Grid -->
         <TransitionGroup
-            name="card"
             tag="div"
             class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
+            enter-active-class="transition-all duration-300 ease-out"
+            enter-from-class="translate-y-3 opacity-0"
         >
             <article
                 v-for="event in rows"
@@ -304,13 +305,3 @@ onBeforeUnmount(() => observer?.disconnect());
 
     <EventRegisterDialog ref="registerDialog" />
 </template>
-
-<style scoped>
-.card-enter-active {
-    transition: all 0.4s ease;
-}
-.card-enter-from {
-    opacity: 0;
-    transform: translateY(12px);
-}
-</style>
