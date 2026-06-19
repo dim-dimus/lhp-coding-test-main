@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { eventDateTime } from '@/lib/datetime';
+import { statusVariant } from '@/lib/events';
 
 interface EventRow {
     id: string;
@@ -18,11 +19,13 @@ interface EventRow {
     address: string | null;
 }
 
+type EventRowWithDt = EventRow & { dt: ReturnType<typeof eventDateTime> };
+
 interface DayGroup {
     key: string;
     weekday: string;
     dayNum: string;
-    events: EventRow[];
+    events: EventRowWithDt[];
 }
 
 const props = defineProps<{
@@ -48,6 +51,7 @@ const loading = ref(false);
 const registerDialog = ref<InstanceType<typeof EventRegisterDialog> | null>(null);
 
 let observer: IntersectionObserver | null = null;
+let observedEl: Element | null = null;
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const isoDay = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -66,7 +70,7 @@ const triggerId = computed(() => {
 });
 
 const groups = computed<DayGroup[]>(() => {
-    const map = new Map<string, EventRow[]>();
+    const map = new Map<string, EventRowWithDt[]>();
 
     for (const event of events.value) {
         if (!event.created_time) {
@@ -80,7 +84,7 @@ const groups = computed<DayGroup[]>(() => {
             map.set(key, []);
         }
 
-        map.get(key)!.push(event);
+        map.get(key)!.push({ ...event, dt: eventDateTime(event.created_time) });
     }
 
     return Array.from(map.entries())
@@ -142,12 +146,13 @@ function reload() {
 
 // Re-point the IntersectionObserver at the current midpoint card as it moves.
 function onTriggerRef(el: unknown) {
-    if (!observer || !(el instanceof Element)) {
+    if (!observer || !(el instanceof Element) || el === observedEl) {
         return;
     }
 
     observer.disconnect();
     observer.observe(el);
+    observedEl = el;
 }
 
 function shiftMonth(delta: number) {
@@ -156,22 +161,10 @@ function shiftMonth(delta: number) {
 }
 
 function goToday() {
-    month.value = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const now = new Date();
+    month.value = new Date(now.getFullYear(), now.getMonth(), 1);
     reload();
 }
-
-const statusVariant = (status: string) => {
-    switch (status) {
-        case 'published':
-            return 'default';
-        case 'cancelled':
-            return 'destructive';
-        case 'sold_out':
-            return 'secondary';
-        default:
-            return 'outline';
-    }
-};
 
 function openRegister(event: EventRow) {
     registerDialog.value?.show(event.id, event.name ?? 'this event');
@@ -189,7 +182,10 @@ onMounted(() => {
     reload();
 });
 
-onBeforeUnmount(() => observer?.disconnect());
+onBeforeUnmount(() => {
+    observer?.disconnect();
+    observedEl = null;
+});
 </script>
 
 <template>
@@ -281,8 +277,8 @@ onBeforeUnmount(() => observer?.disconnect());
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2 text-xs text-muted-foreground">
                                 <span class="font-medium text-foreground">
-                                    {{ eventDateTime(event.created_time)?.time }}
-                                    {{ eventDateTime(event.created_time)?.tz }}
+                                    {{ event.dt?.time }}
+                                    {{ event.dt?.tz }}
                                 </span>
                                 <span>·</span>
                                 <span class="uppercase tracking-wide text-primary">{{ event.type }}</span>

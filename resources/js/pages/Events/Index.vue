@@ -4,6 +4,7 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { eventDateTime } from '@/lib/datetime';
+import { statusVariant } from '@/lib/events';
 
 interface EventRow {
     id: string;
@@ -91,19 +92,6 @@ function applyFilters() {
     hasLoadedOnce.value = false;
     loadMore();
 }
-
-const statusVariant = (status: string) => {
-    switch (status) {
-        case 'published':
-            return 'default';
-        case 'cancelled':
-            return 'destructive';
-        case 'sold_out':
-            return 'secondary';
-        default:
-            return 'outline';
-    }
-};
 
 onMounted(() => {
     observer = new IntersectionObserver(

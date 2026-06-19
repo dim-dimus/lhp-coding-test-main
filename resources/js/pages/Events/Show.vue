@@ -5,6 +5,7 @@ import EventRegisterDialog from '@/components/EventRegisterDialog.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { eventDateTime } from '@/lib/datetime';
+import { priceLabel, statusVariant } from '@/lib/events';
 
 interface EventDetail {
     id: string;
@@ -36,28 +37,10 @@ function goBack() {
     }
 }
 
-const statusVariant = (status: string) => {
-    switch (status) {
-        case 'published':
-            return 'default';
-        case 'cancelled':
-            return 'destructive';
-        case 'sold_out':
-            return 'secondary';
-        default:
-            return 'outline';
-    }
-};
-
-function priceLabel(): string {
-    const price = Number(props.event.payload.pricing?.min_price ?? 0);
-
-    if (!price) {
-        return 'Free';
-    }
-
-    return `${props.event.payload.pricing?.currency ?? 'USD'} ${price.toFixed(0)}+`;
-}
+const eventPrice = priceLabel(
+    Number(props.event.payload.pricing?.min_price ?? 0),
+    props.event.payload.pricing?.currency ?? 'USD',
+);
 
 function openRegister() {
     registerDialog.value?.show(props.event.id, props.event.payload.name ?? 'this event');
@@ -122,7 +105,7 @@ function openRegister() {
             </div>
             <div>
                 <dt class="text-xs uppercase text-muted-foreground">Price</dt>
-                <dd class="font-medium">{{ priceLabel() }}</dd>
+                <dd class="font-medium">{{ eventPrice }}</dd>
             </div>
         </dl>
     </div>

@@ -13,6 +13,9 @@ class Geocoder
     /** @var array<int, array{0: float, 1: float, 2: string, 3: ?string, 4: string}>|null */
     private static ?array $anchors = null;
 
+    /** @var list<string>|null */
+    private static ?array $cities = null;
+
     /**
      * @return array{city: string, region: ?string, country: string}|null
      */
@@ -64,11 +67,15 @@ class Geocoder
      */
     public static function cities(): array
     {
+        if (self::$cities !== null) {
+            return self::$cities;
+        }
+
         $names = array_map(fn (array $anchor): string => $anchor[2], self::anchors());
         $names = array_values(array_unique($names));
         sort($names);
 
-        return $names;
+        return self::$cities = $names;
     }
 
     /**

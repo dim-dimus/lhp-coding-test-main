@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import EventRegisterDialog from '@/components/EventRegisterDialog.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { eventDateTime } from '@/lib/datetime';
+import { priceLabel, statusVariant } from '@/lib/events';
 
 interface EventCard {
     id: string;
@@ -111,28 +112,9 @@ function resetFilters() {
     applyFilters();
 }
 
-const statusVariant = (status: string) => {
-    switch (status) {
-        case 'published':
-            return 'default';
-        case 'cancelled':
-            return 'destructive';
-        case 'sold_out':
-            return 'secondary';
-        default:
-            return 'outline';
-    }
-};
-
-function priceLabel(event: EventCard): string {
-    const price = event.price.min ?? 0;
-
-    if (!price) {
-        return 'Free';
-    }
-
-    return `${event.price.currency} ${price.toFixed(0)}+`;
-}
+const rowsWithDt = computed(() =>
+    rows.value.map((e) => ({ ...e, dt: eventDateTime(e.created_time) })),
+);
 
 function openRegister(event: EventCard) {
     registerDialog.value?.show(event.id, event.name ?? 'this event');
@@ -232,7 +214,7 @@ onBeforeUnmount(() => observer?.disconnect());
             enter-from-class="translate-y-3 opacity-0"
         >
             <article
-                v-for="event in rows"
+                v-for="event in rowsWithDt"
                 :key="event.id"
                 class="group flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
@@ -254,7 +236,7 @@ onBeforeUnmount(() => observer?.disconnect());
                     <span
                         class="absolute right-3 top-3 rounded-full bg-background/90 px-2.5 py-1 text-xs font-medium shadow"
                     >
-                        {{ priceLabel(event) }}
+                        {{ priceLabel(event.price.min, event.price.currency) }}
                     </span>
                 </div>
 
@@ -272,14 +254,14 @@ onBeforeUnmount(() => observer?.disconnect());
 
                     <dl class="mt-auto space-y-1 pt-2 text-sm">
                         <div
-                            v-if="eventDateTime(event.created_time)"
+                            v-if="event.dt"
                             class="flex items-center gap-2"
                         >
                             <span aria-hidden="true">📅</span>
-                            <time :datetime="eventDateTime(event.created_time)!.iso">
-                                {{ eventDateTime(event.created_time)!.date }} ·
-                                {{ eventDateTime(event.created_time)!.time }}
-                                <span class="text-muted-foreground">{{ eventDateTime(event.created_time)!.tz }}</span>
+                            <time :datetime="event.dt.iso">
+                                {{ event.dt.date }} ·
+                                {{ event.dt.time }}
+                                <span class="text-muted-foreground">{{ event.dt.tz }}</span>
                             </time>
                         </div>
                         <div class="flex items-center gap-2">
