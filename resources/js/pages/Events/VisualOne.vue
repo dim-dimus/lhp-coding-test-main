@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import EventRegisterDialog from '@/components/EventRegisterDialog.vue';
 import { Badge } from '@/components/ui/badge';
@@ -237,12 +237,14 @@ onBeforeUnmount(() => observer?.disconnect());
                 class="group flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
                 <div class="relative aspect-[16/10] overflow-hidden bg-muted">
-                    <img
-                        :src="event.images[0]"
-                        :alt="event.name ?? 'Event'"
-                        loading="lazy"
-                        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                    />
+                    <Link :href="`/events/${event.id}`" class="block h-full w-full">
+                        <img
+                            :src="event.images[0]"
+                            :alt="event.name ?? 'Event'"
+                            loading="lazy"
+                            class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                        />
+                    </Link>
                     <Badge
                         :variant="statusVariant(event.status)"
                         class="absolute left-3 top-3 capitalize shadow"
@@ -258,9 +260,12 @@ onBeforeUnmount(() => observer?.disconnect());
 
                 <div class="flex flex-1 flex-col gap-2 p-4">
                     <span class="text-xs font-medium uppercase tracking-wide text-primary">{{ event.type }}</span>
-                    <h2 class="line-clamp-1 text-lg font-semibold">
+                    <Link
+                        :href="`/events/${event.id}`"
+                        class="line-clamp-1 text-lg font-semibold hover:underline"
+                    >
                         {{ event.name ?? 'Untitled event' }}
-                    </h2>
+                    </Link>
                     <p class="line-clamp-2 text-sm text-muted-foreground">
                         {{ event.description }}
                     </p>
@@ -286,6 +291,7 @@ onBeforeUnmount(() => observer?.disconnect());
                     <Button
                         class="mt-3 w-full"
                         variant="secondary"
+                        :disabled="event.status !== 'published'"
                         @click="openRegister(event)"
                     >
                         Register interest

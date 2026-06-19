@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import EventRegisterDialog from '@/components/EventRegisterDialog.vue';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { eventDateTime } from '@/lib/datetime';
 interface EventRow {
     id: string;
     name: string | null;
+    description: string | null;
     type: string;
     status: string;
     created_time: number | null;
@@ -286,14 +287,22 @@ onBeforeUnmount(() => observer?.disconnect());
                                 <span>·</span>
                                 <span class="uppercase tracking-wide text-primary">{{ event.type }}</span>
                             </div>
-                            <h3 class="truncate font-semibold">{{ event.name ?? 'Untitled event' }}</h3>
-                            <p class="truncate text-sm text-muted-foreground">📍 {{ event.address ?? 'Location TBA' }}</p>
+                            <Link
+                                :href="`/events/${event.id}`"
+                                class="block truncate font-semibold hover:underline"
+                            >
+                                {{ event.name ?? 'Untitled event' }}
+                            </Link>
+                            <p v-if="event.description" class="truncate text-sm text-muted-foreground">
+                                {{ event.description }}
+                            </p>
+                            <p class="truncate text-xs text-muted-foreground">📍 {{ event.address ?? 'Location TBA' }}</p>
                         </div>
                         <div class="flex shrink-0 flex-col items-end justify-between gap-2">
                             <Badge :variant="statusVariant(event.status)" class="capitalize">
                                 {{ event.status.replace('_', ' ') }}
                             </Badge>
-                            <Button size="sm" variant="secondary" @click="openRegister(event)">Register</Button>
+                            <Button size="sm" variant="secondary" :disabled="event.status !== 'published'" @click="openRegister(event)">Register</Button>
                         </div>
                     </article>
                 </div>
