@@ -1,7 +1,8 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
+import attendees from './attendees'
 /**
 * @see \App\Http\Controllers\EventController::index
-* @see app/Http/Controllers/EventController.php:14
+* @see app/Http/Controllers/EventController.php:19
 * @route '/events'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +17,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\EventController::index
-* @see app/Http/Controllers/EventController.php:14
+* @see app/Http/Controllers/EventController.php:19
 * @route '/events'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +26,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\EventController::index
-* @see app/Http/Controllers/EventController.php:14
+* @see app/Http/Controllers/EventController.php:19
 * @route '/events'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +36,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\EventController::index
-* @see app/Http/Controllers/EventController.php:14
+* @see app/Http/Controllers/EventController.php:19
 * @route '/events'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +46,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\EventController::index
-* @see app/Http/Controllers/EventController.php:14
+* @see app/Http/Controllers/EventController.php:19
 * @route '/events'
 */
 const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -55,7 +56,7 @@ const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\EventController::index
-* @see app/Http/Controllers/EventController.php:14
+* @see app/Http/Controllers/EventController.php:19
 * @route '/events'
 */
 indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -65,7 +66,7 @@ indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\EventController::index
-* @see app/Http/Controllers/EventController.php:14
+* @see app/Http/Controllers/EventController.php:19
 * @route '/events'
 */
 indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -82,7 +83,7 @@ index.form = indexForm
 
 /**
 * @see \App\Http\Controllers\EventController::data
-* @see app/Http/Controllers/EventController.php:25
+* @see app/Http/Controllers/EventController.php:40
 * @route '/events/data'
 */
 export const data = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -97,7 +98,7 @@ data.definition = {
 
 /**
 * @see \App\Http\Controllers\EventController::data
-* @see app/Http/Controllers/EventController.php:25
+* @see app/Http/Controllers/EventController.php:40
 * @route '/events/data'
 */
 data.url = (options?: RouteQueryOptions) => {
@@ -106,7 +107,7 @@ data.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\EventController::data
-* @see app/Http/Controllers/EventController.php:25
+* @see app/Http/Controllers/EventController.php:40
 * @route '/events/data'
 */
 data.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -116,7 +117,7 @@ data.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\EventController::data
-* @see app/Http/Controllers/EventController.php:25
+* @see app/Http/Controllers/EventController.php:40
 * @route '/events/data'
 */
 data.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -126,7 +127,7 @@ data.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\EventController::data
-* @see app/Http/Controllers/EventController.php:25
+* @see app/Http/Controllers/EventController.php:40
 * @route '/events/data'
 */
 const dataForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -136,7 +137,7 @@ const dataForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\EventController::data
-* @see app/Http/Controllers/EventController.php:25
+* @see app/Http/Controllers/EventController.php:40
 * @route '/events/data'
 */
 dataForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -146,7 +147,7 @@ dataForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\EventController::data
-* @see app/Http/Controllers/EventController.php:25
+* @see app/Http/Controllers/EventController.php:40
 * @route '/events/data'
 */
 dataForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -163,7 +164,7 @@ data.form = dataForm
 
 /**
 * @see \App\Http\Controllers\EventController::show
-* @see app/Http/Controllers/EventController.php:38
+* @see app/Http/Controllers/EventController.php:45
 * @route '/events/{event}'
 */
 export const show = (args: { event: string | { id: string } } | [event: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -178,7 +179,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\EventController::show
-* @see app/Http/Controllers/EventController.php:38
+* @see app/Http/Controllers/EventController.php:45
 * @route '/events/{event}'
 */
 show.url = (args: { event: string | { id: string } } | [event: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -211,7 +212,7 @@ show.url = (args: { event: string | { id: string } } | [event: string | { id: st
 
 /**
 * @see \App\Http\Controllers\EventController::show
-* @see app/Http/Controllers/EventController.php:38
+* @see app/Http/Controllers/EventController.php:45
 * @route '/events/{event}'
 */
 show.get = (args: { event: string | { id: string } } | [event: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -221,7 +222,7 @@ show.get = (args: { event: string | { id: string } } | [event: string | { id: st
 
 /**
 * @see \App\Http\Controllers\EventController::show
-* @see app/Http/Controllers/EventController.php:38
+* @see app/Http/Controllers/EventController.php:45
 * @route '/events/{event}'
 */
 show.head = (args: { event: string | { id: string } } | [event: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -231,7 +232,7 @@ show.head = (args: { event: string | { id: string } } | [event: string | { id: s
 
 /**
 * @see \App\Http\Controllers\EventController::show
-* @see app/Http/Controllers/EventController.php:38
+* @see app/Http/Controllers/EventController.php:45
 * @route '/events/{event}'
 */
 const showForm = (args: { event: string | { id: string } } | [event: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -241,7 +242,7 @@ const showForm = (args: { event: string | { id: string } } | [event: string | { 
 
 /**
 * @see \App\Http\Controllers\EventController::show
-* @see app/Http/Controllers/EventController.php:38
+* @see app/Http/Controllers/EventController.php:45
 * @route '/events/{event}'
 */
 showForm.get = (args: { event: string | { id: string } } | [event: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -251,7 +252,7 @@ showForm.get = (args: { event: string | { id: string } } | [event: string | { id
 
 /**
 * @see \App\Http\Controllers\EventController::show
-* @see app/Http/Controllers/EventController.php:38
+* @see app/Http/Controllers/EventController.php:45
 * @route '/events/{event}'
 */
 showForm.head = (args: { event: string | { id: string } } | [event: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -267,8 +268,8 @@ showForm.head = (args: { event: string | { id: string } } | [event: string | { i
 show.form = showForm
 
 /**
-* @see \Inertia\Controller::__invoke
-* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\EventController::visual1
+* @see app/Http/Controllers/EventController.php:30
 * @route '/events-visual-1'
 */
 export const visual1 = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -282,8 +283,8 @@ visual1.definition = {
 } satisfies RouteDefinition<["get","head"]>
 
 /**
-* @see \Inertia\Controller::__invoke
-* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\EventController::visual1
+* @see app/Http/Controllers/EventController.php:30
 * @route '/events-visual-1'
 */
 visual1.url = (options?: RouteQueryOptions) => {
@@ -291,8 +292,8 @@ visual1.url = (options?: RouteQueryOptions) => {
 }
 
 /**
-* @see \Inertia\Controller::__invoke
-* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\EventController::visual1
+* @see app/Http/Controllers/EventController.php:30
 * @route '/events-visual-1'
 */
 visual1.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -301,8 +302,8 @@ visual1.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 
 /**
-* @see \Inertia\Controller::__invoke
-* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\EventController::visual1
+* @see app/Http/Controllers/EventController.php:30
 * @route '/events-visual-1'
 */
 visual1.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -311,8 +312,8 @@ visual1.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
 /**
-* @see \Inertia\Controller::__invoke
-* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\EventController::visual1
+* @see app/Http/Controllers/EventController.php:30
 * @route '/events-visual-1'
 */
 const visual1Form = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -321,8 +322,8 @@ const visual1Form = (options?: RouteQueryOptions): RouteFormDefinition<'get'> =>
 })
 
 /**
-* @see \Inertia\Controller::__invoke
-* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\EventController::visual1
+* @see app/Http/Controllers/EventController.php:30
 * @route '/events-visual-1'
 */
 visual1Form.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -331,8 +332,8 @@ visual1Form.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 })
 
 /**
-* @see \Inertia\Controller::__invoke
-* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\EventController::visual1
+* @see app/Http/Controllers/EventController.php:30
 * @route '/events-visual-1'
 */
 visual1Form.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -348,8 +349,8 @@ visual1Form.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => 
 visual1.form = visual1Form
 
 /**
-* @see \Inertia\Controller::__invoke
-* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\EventController::visual2
+* @see app/Http/Controllers/EventController.php:35
 * @route '/events-visual-2'
 */
 export const visual2 = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -363,8 +364,8 @@ visual2.definition = {
 } satisfies RouteDefinition<["get","head"]>
 
 /**
-* @see \Inertia\Controller::__invoke
-* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\EventController::visual2
+* @see app/Http/Controllers/EventController.php:35
 * @route '/events-visual-2'
 */
 visual2.url = (options?: RouteQueryOptions) => {
@@ -372,8 +373,8 @@ visual2.url = (options?: RouteQueryOptions) => {
 }
 
 /**
-* @see \Inertia\Controller::__invoke
-* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\EventController::visual2
+* @see app/Http/Controllers/EventController.php:35
 * @route '/events-visual-2'
 */
 visual2.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -382,8 +383,8 @@ visual2.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 
 /**
-* @see \Inertia\Controller::__invoke
-* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\EventController::visual2
+* @see app/Http/Controllers/EventController.php:35
 * @route '/events-visual-2'
 */
 visual2.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -392,8 +393,8 @@ visual2.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
 /**
-* @see \Inertia\Controller::__invoke
-* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\EventController::visual2
+* @see app/Http/Controllers/EventController.php:35
 * @route '/events-visual-2'
 */
 const visual2Form = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -402,8 +403,8 @@ const visual2Form = (options?: RouteQueryOptions): RouteFormDefinition<'get'> =>
 })
 
 /**
-* @see \Inertia\Controller::__invoke
-* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\EventController::visual2
+* @see app/Http/Controllers/EventController.php:35
 * @route '/events-visual-2'
 */
 visual2Form.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -412,8 +413,8 @@ visual2Form.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 })
 
 /**
-* @see \Inertia\Controller::__invoke
-* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\EventController::visual2
+* @see app/Http/Controllers/EventController.php:35
 * @route '/events-visual-2'
 */
 visual2Form.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -432,6 +433,7 @@ const events = {
     index: Object.assign(index, index),
     data: Object.assign(data, data),
     show: Object.assign(show, show),
+    attendees: Object.assign(attendees, attendees),
     visual1: Object.assign(visual1, visual1),
     visual2: Object.assign(visual2, visual2),
 }

@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\EventController::index
-* @see app/Http/Controllers/EventController.php:14
+* @see app/Http/Controllers/EventController.php:19
 * @route '/events'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\EventController::index
-* @see app/Http/Controllers/EventController.php:14
+* @see app/Http/Controllers/EventController.php:19
 * @route '/events'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\EventController::index
-* @see app/Http/Controllers/EventController.php:14
+* @see app/Http/Controllers/EventController.php:19
 * @route '/events'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\EventController::index
-* @see app/Http/Controllers/EventController.php:14
+* @see app/Http/Controllers/EventController.php:19
 * @route '/events'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\EventController::index
-* @see app/Http/Controllers/EventController.php:14
+* @see app/Http/Controllers/EventController.php:19
 * @route '/events'
 */
 const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -55,7 +55,7 @@ const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\EventController::index
-* @see app/Http/Controllers/EventController.php:14
+* @see app/Http/Controllers/EventController.php:19
 * @route '/events'
 */
 indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -65,7 +65,7 @@ indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\EventController::index
-* @see app/Http/Controllers/EventController.php:14
+* @see app/Http/Controllers/EventController.php:19
 * @route '/events'
 */
 indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -82,7 +82,7 @@ index.form = indexForm
 
 /**
 * @see \App\Http\Controllers\EventController::data
-* @see app/Http/Controllers/EventController.php:25
+* @see app/Http/Controllers/EventController.php:40
 * @route '/events/data'
 */
 export const data = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -97,7 +97,7 @@ data.definition = {
 
 /**
 * @see \App\Http\Controllers\EventController::data
-* @see app/Http/Controllers/EventController.php:25
+* @see app/Http/Controllers/EventController.php:40
 * @route '/events/data'
 */
 data.url = (options?: RouteQueryOptions) => {
@@ -106,7 +106,7 @@ data.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\EventController::data
-* @see app/Http/Controllers/EventController.php:25
+* @see app/Http/Controllers/EventController.php:40
 * @route '/events/data'
 */
 data.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -116,7 +116,7 @@ data.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\EventController::data
-* @see app/Http/Controllers/EventController.php:25
+* @see app/Http/Controllers/EventController.php:40
 * @route '/events/data'
 */
 data.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -126,7 +126,7 @@ data.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\EventController::data
-* @see app/Http/Controllers/EventController.php:25
+* @see app/Http/Controllers/EventController.php:40
 * @route '/events/data'
 */
 const dataForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -136,7 +136,7 @@ const dataForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\EventController::data
-* @see app/Http/Controllers/EventController.php:25
+* @see app/Http/Controllers/EventController.php:40
 * @route '/events/data'
 */
 dataForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -146,7 +146,7 @@ dataForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\EventController::data
-* @see app/Http/Controllers/EventController.php:25
+* @see app/Http/Controllers/EventController.php:40
 * @route '/events/data'
 */
 dataForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -163,7 +163,7 @@ data.form = dataForm
 
 /**
 * @see \App\Http\Controllers\EventController::show
-* @see app/Http/Controllers/EventController.php:38
+* @see app/Http/Controllers/EventController.php:45
 * @route '/events/{event}'
 */
 export const show = (args: { event: string | { id: string } } | [event: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -178,7 +178,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\EventController::show
-* @see app/Http/Controllers/EventController.php:38
+* @see app/Http/Controllers/EventController.php:45
 * @route '/events/{event}'
 */
 show.url = (args: { event: string | { id: string } } | [event: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -211,7 +211,7 @@ show.url = (args: { event: string | { id: string } } | [event: string | { id: st
 
 /**
 * @see \App\Http\Controllers\EventController::show
-* @see app/Http/Controllers/EventController.php:38
+* @see app/Http/Controllers/EventController.php:45
 * @route '/events/{event}'
 */
 show.get = (args: { event: string | { id: string } } | [event: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -221,7 +221,7 @@ show.get = (args: { event: string | { id: string } } | [event: string | { id: st
 
 /**
 * @see \App\Http\Controllers\EventController::show
-* @see app/Http/Controllers/EventController.php:38
+* @see app/Http/Controllers/EventController.php:45
 * @route '/events/{event}'
 */
 show.head = (args: { event: string | { id: string } } | [event: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -231,7 +231,7 @@ show.head = (args: { event: string | { id: string } } | [event: string | { id: s
 
 /**
 * @see \App\Http\Controllers\EventController::show
-* @see app/Http/Controllers/EventController.php:38
+* @see app/Http/Controllers/EventController.php:45
 * @route '/events/{event}'
 */
 const showForm = (args: { event: string | { id: string } } | [event: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -241,7 +241,7 @@ const showForm = (args: { event: string | { id: string } } | [event: string | { 
 
 /**
 * @see \App\Http\Controllers\EventController::show
-* @see app/Http/Controllers/EventController.php:38
+* @see app/Http/Controllers/EventController.php:45
 * @route '/events/{event}'
 */
 showForm.get = (args: { event: string | { id: string } } | [event: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -251,7 +251,7 @@ showForm.get = (args: { event: string | { id: string } } | [event: string | { id
 
 /**
 * @see \App\Http\Controllers\EventController::show
-* @see app/Http/Controllers/EventController.php:38
+* @see app/Http/Controllers/EventController.php:45
 * @route '/events/{event}'
 */
 showForm.head = (args: { event: string | { id: string } } | [event: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -266,6 +266,168 @@ showForm.head = (args: { event: string | { id: string } } | [event: string | { i
 
 show.form = showForm
 
-const EventController = { index, data, show }
+/**
+* @see \App\Http\Controllers\EventController::visualOne
+* @see app/Http/Controllers/EventController.php:30
+* @route '/events-visual-1'
+*/
+export const visualOne = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: visualOne.url(options),
+    method: 'get',
+})
+
+visualOne.definition = {
+    methods: ["get","head"],
+    url: '/events-visual-1',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\EventController::visualOne
+* @see app/Http/Controllers/EventController.php:30
+* @route '/events-visual-1'
+*/
+visualOne.url = (options?: RouteQueryOptions) => {
+    return visualOne.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\EventController::visualOne
+* @see app/Http/Controllers/EventController.php:30
+* @route '/events-visual-1'
+*/
+visualOne.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: visualOne.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\EventController::visualOne
+* @see app/Http/Controllers/EventController.php:30
+* @route '/events-visual-1'
+*/
+visualOne.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: visualOne.url(options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\EventController::visualOne
+* @see app/Http/Controllers/EventController.php:30
+* @route '/events-visual-1'
+*/
+const visualOneForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: visualOne.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\EventController::visualOne
+* @see app/Http/Controllers/EventController.php:30
+* @route '/events-visual-1'
+*/
+visualOneForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: visualOne.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\EventController::visualOne
+* @see app/Http/Controllers/EventController.php:30
+* @route '/events-visual-1'
+*/
+visualOneForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: visualOne.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+visualOne.form = visualOneForm
+
+/**
+* @see \App\Http\Controllers\EventController::visualTwo
+* @see app/Http/Controllers/EventController.php:35
+* @route '/events-visual-2'
+*/
+export const visualTwo = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: visualTwo.url(options),
+    method: 'get',
+})
+
+visualTwo.definition = {
+    methods: ["get","head"],
+    url: '/events-visual-2',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\EventController::visualTwo
+* @see app/Http/Controllers/EventController.php:35
+* @route '/events-visual-2'
+*/
+visualTwo.url = (options?: RouteQueryOptions) => {
+    return visualTwo.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\EventController::visualTwo
+* @see app/Http/Controllers/EventController.php:35
+* @route '/events-visual-2'
+*/
+visualTwo.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: visualTwo.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\EventController::visualTwo
+* @see app/Http/Controllers/EventController.php:35
+* @route '/events-visual-2'
+*/
+visualTwo.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: visualTwo.url(options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\EventController::visualTwo
+* @see app/Http/Controllers/EventController.php:35
+* @route '/events-visual-2'
+*/
+const visualTwoForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: visualTwo.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\EventController::visualTwo
+* @see app/Http/Controllers/EventController.php:35
+* @route '/events-visual-2'
+*/
+visualTwoForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: visualTwo.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\EventController::visualTwo
+* @see app/Http/Controllers/EventController.php:35
+* @route '/events-visual-2'
+*/
+visualTwoForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: visualTwo.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+visualTwo.form = visualTwoForm
+
+const EventController = { index, data, show, visualOne, visualTwo }
 
 export default EventController

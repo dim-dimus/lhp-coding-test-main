@@ -23,5 +23,9 @@ class DatabaseSeeder extends Seeder
         // Defaults to 1,250,000 events (≈2.5 GB; ~3s first listing load on a
         // laptop). Override with SEED_ROWS, e.g. SEED_ROWS=50000 php artisan db:seed
         $this->call(EventSeeder::class);
+
+        // Denormalize city/country from lat/lng so the location filter is an
+        // indexed equality lookup (Approach A — see CLAUDE.md).
+        $this->command->call('events:backfill-locations');
     }
 }
